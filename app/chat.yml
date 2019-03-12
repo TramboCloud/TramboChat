@@ -10,8 +10,8 @@ Parameters:
     Type: String
   DockerImage:
     Type: String
-  # DDApiKey:
-  #   Type: String
+  Redis:
+    Type: String
   AppName:
     Type: String
     Default: rest
@@ -34,9 +34,15 @@ Resources:
             - ContainerPort: !Ref ContainerPort
           Image: !Sub ${DockerImage}-${Environment}:latest
           Command: ["npm","start"]
-          # Environment:
-            # - Name: EUREKA_URI
-            #   Value: https://web-dev-user:welcome1234@sbc-gateway-staging.specialized.com/eureka
+          Environment:
+            - Name: REDIS_HOST
+              Value: !Ref Redis
+            - Name: REDIS_PORT
+              Value: 6379
+            - Name: PORT
+              Value: 8000
+            - Name: BIND
+              Value: 0.0.0.0
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -44,14 +50,6 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: !Ref Environment
           MemoryReservation: 400
-        # - Name: datadog-agent
-        #   Image: datadog/agent:latest
-        #   Essential: true
-        #   Environment:
-        #     - Name: DD_API_KEY
-        #       Value: !Ref DDApiKey
-        #     - Name: ECS_FARGATE
-        #       Value: true
 
   Taskrole:
     Type: AWS::IAM::Role

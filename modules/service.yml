@@ -40,8 +40,8 @@ Parameters:
     Type: String
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
-  # DDApiKey:
-  #   Type: String
+  Redis:
+    Type: String
 
 
 Resources:
@@ -124,7 +124,7 @@ Resources:
         ServiceName: !Ref ServiceName
         ContainerPort: !Ref ContainerPort
         DockerImage: !Join [ ".", [ !Ref "AWS::AccountId", "dkr.ecr", !Ref "AWS::Region", !Join [ "/", [ "amazonaws.com", !Ref "ServiceName" ] ] ] ]
-        # DDApiKey: !Ref DDApiKey
+        Redis: !Ref Redis
 
   Service:
     Type: AWS::ECS::Service

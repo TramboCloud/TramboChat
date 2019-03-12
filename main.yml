@@ -164,7 +164,7 @@ Resources:
       Parameters:
         Cluster: !GetAtt ECSCluster.Outputs.EcsCluster
         BucketName: !Ref BucketName
-        ContainerPort: 3000
+        ContainerPort: 8000
         LoadBalancerArn: !GetAtt LoadBalancer.Outputs.LoadBalancerArn
         ListenerArn: !GetAtt LoadBalancer.Outputs.ListenerArn
         HttpsListenerArn: !GetAtt LoadBalancer.Outputs.ListenerArn
@@ -178,3 +178,4 @@ Resources:
         HostHeader: !Sub chat.${HostedZoneName}
         Priority: 30
         HealthCheckPath: /
+        Redis: !GetAtt ElasticCache.Outputs.ClusterDNS
