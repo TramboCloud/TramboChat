@@ -1,0 +1,11 @@
+tests/
+test/
+elm/
+.git
+.gitignore
+.dockerignore
+service.file
+package-lock.json
+docker-compose.yml
+Dockerfile
+node_modules/
