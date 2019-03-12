@@ -1,0 +1,439 @@
+Description:
+  Main Template
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: General configuration
+      Parameters:
+        - Environment
+        # - BucketName
+    - Label:
+        default: Network configuration
+      Parameters:
+        - VpcCIDR
+        - Certificate
+        - HostedZoneName
+        # - HostedZoneId
+    - Label:
+        default: ECS configuration
+      Parameters:
+    #     - ClusterType
+        - InstanceTypeECS
+        - KeyName
+    #     - ECR
+    - Label:
+        default: Datastore configuration
+      Parameters:
+        - InstanceTypeElasticCache
+    #     - InstanceTypeRDS
+    #     - DatabaseUsername
+    #     - DatabasePassword
+    #     - RedisEncrypted
+    #     - RDSEncrypted
+    # - Label:
+    #     default: External tools configuration
+    #   Parameters:
+    #     - DataDogApiKey
+    #     - DatadogAPMEnabled
+  Stack:
+    Value: 0
+  VersionDate:
+    Value: 20160518
+  Identifier:
+    Value: main
+  Input:
+    Description: Input of all required parameters in nested stacks
+  Output:
+    Description: N/A
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: Bucket where the templates are stored.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-.]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, periods (.), and hyphens (-). It cannot start or
+      end with a hyphen (-).
+    Default: "trambo-demo"
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: eu-west-1
+    Description: AWS Keypair for instances SSH. If you select Fargate in the ClusterType, this field will not take effect.
+  VpcCIDR:
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Default: 10.40.0.0/16
+    Description: VPC CIDR Block (eg 10.0.0.0/16)
+    Type: String
+  # ClusterType:
+  #   Description: ECS Cluster Type to launch services
+  #   Type: String
+  #   Default: Fargate
+  #   AllowedValues:
+  #     - EC2(OnDemand)
+  #     - Fargate
+  InstanceTypeElasticCache:
+    Type: String
+    Default: cache.t2.medium
+    Description: For nodes with more than 2, use cache.m3.medium.
+    AllowedValues:
+      - cache.m3.medium
+      - cache.t2.micro
+      - cache.t2.medium
+      - cache.m4.large
+      - cache.m4.xlarge
+      - cache.r4.large
+      - cache.r4.xlarge
+  # InstanceTypeRDS:
+  #   Type: String
+  #   Default: db.t2.medium
+  #   Description: RDS instance size.
+  #   AllowedValues:
+  #     - db.t2.micro
+  #     - db.t2.medium
+  #     - db.m4.large
+  #     - db.m4.xlarge
+  #     - db.m4.2xlarge
+  #     - db.r4.large
+  #     - db.r4.xlarge
+  InstanceTypeECS:
+    Type: String
+    Default: t2.large
+    AllowedValues:
+      - t2.micro
+      - t2.medium
+      - t2.medium
+      - t2.large
+      - m4.large
+      - m4.xlarge
+      - c4.large
+      - c4.xlarge
+    Description: If you select Fargate in the ClusterType, this field will not take effect.
+  Environment:
+    Type: String
+    Default: demo
+    Description: Environment Name - This is used like a suffix for many resources.
+  # DataDogApiKey:
+  #   Type: String
+  #   NoEcho: true
+  #   Default: "DatadogKey"
+  #   Description: Delete this string if you do not want to enable logging to DataDog.
+  # DatadogAPMEnabled:
+  #   Type: String
+  #   Default: false
+  #   AllowedValues:
+  #     - true
+  #     - false
+  #   Description: Select true to enable Datadog's APM monitoring
+  # DatabaseUsername:
+  #   Type: String
+  #   NoEcho: true
+  #   Description: Specify a username for your RDS
+  #   Default: af2018dbuser
+  # DatabasePassword:
+  #   Type: String
+  #   NoEcho: true
+  #   Description: Database user password (Change it)
+  #   Default: dbpassafdev2018#
+  Certificate:
+    Type: String
+    Description: Certificate used in the ALB
+  HostedZoneName:
+    Type: String
+    Default: trambo.cloud
+  # HostedZoneId:
+  #   Type: String
+  #   Default: ZHPCUKNGNF3NK
+  # HostedZoneId:
+  #   Type: String
+  #   Default: ZHPCUKNGNF3NK
+  # ECR:
+  #   Description: The universal ECR where the images will be stored.
+  #   Type: String
+  #   Default: 283581413083.dkr.ecr.us-east-1.amazonaws.com/af-artifactory
+  # DockerTag:
+  #   Description: Tag for the docker image for the services
+  #   Type: String
+  #   Default: latest
+  # DatabaseBucketName:
+  #   Description: The bucket name, where the database will reside
+  #   Type: String
+  #   Default: pipeline-codepipeline
+  # DatabaseBucketKey:
+  #   Description: The key for the database.
+  #   Type: String
+  #   Default: environment_state
+  # RedisEncrypted:
+  #   Description: Set true if you want to encrypt your Redis.
+  #   Type: String
+  #   Default: false
+  #   AllowedValues:
+  #     - false
+  #     - true
+  # RDSEncrypted:
+  #   Description: Set true if you want to encrypt your RDS.
+  #   Type: String
+  #   Default: false
+  #   AllowedValues:
+  #     - false
+  #     - true
+
+
+Resources:
+  VPC:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/vpc.yml
+      TimeoutInMinutes: '60'
+      Parameters:
+        EnvironmentName: !Ref Environment
+        VpcCIDR: !Ref VpcCIDR
+
+  ElasticCache:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/elasticache.yml
+      TimeoutInMinutes: '60'
+      Parameters:
+        Environment: !Ref Environment
+        AutoMinorVersionUpgrade: true
+        ClusterName: !Ref Environment
+        Engine: "redis"
+        NodeCount: 1
+        NodeType: !Ref InstanceTypeElasticCache
+        SubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
+        VpcCidr: !GetAtt VPC.Outputs.VpcCIDR
+        VpcId: !GetAtt VPC.Outputs.VPC
+        Encrypted: false
+
+
+  ECSCluster:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/ecs_cluster.yml
+      TimeoutInMinutes: '60'
+      Parameters:
+        Environment: !Ref Environment
+        ClusterName: !Ref Environment
+        DesiredCapacity: 3
+        InstanceType: !Ref InstanceTypeECS
+        KeyPair: !Ref KeyName
+        MaxBatchSize: 1
+        MaxSize: 5
+        MinInstancesInService: 3
+        MinSize: 1
+        PauseTime: PT3M
+        ClusterType: EC2(OnDemand)
+        SubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
+        VpcId: !GetAtt VPC.Outputs.VPC
+
+
+  ECR:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: bam-chat
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep only last 200 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 200
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+  LoadBalancer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/alb.yml
+      TimeoutInMinutes: '60'
+      Parameters:
+        Environment: !Ref Environment
+        PublicSubnetIds: !GetAtt VPC.Outputs.PublicSubnets
+        VpcId: !GetAtt VPC.Outputs.VPC
+        Certificate: !Ref Certificate
+        HostedZoneName: !Ref HostedZoneName
+
+  # Route53:
+  #   Type: AWS::CloudFormation::Stack
+  #   Condition: CreateRT53
+  #   Properties:
+  #     TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/network/route53.yml
+  #     TimeoutInMinutes: '60'
+  #     Parameters:
+  #       Name: !Sub ${Environment}.velocicast.${HostedZoneName}
+  #       HostedZoneId: !Ref HostedZoneId
+  #       DNSName: !GetAtt LoadBalancer.Outputs.LoadBalancerUrl
+  #       AliasHostedZoneId: !GetAtt LoadBalancer.Outputs.LoadBalancerZone
+  #
+  # ServiceVelocicast:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/infrastructure/service.yml
+  #     TimeoutInMinutes: '60'
+  #     Parameters:
+  #       DesiredCount: 0
+  #       Cluster: !GetAtt ECSCluster.Outputs.EcsCluster
+  #       BucketName: !Ref BucketName
+  #       ContainerPort: 3000
+  #       LoadBalancerArn: !GetAtt LoadBalancer.Outputs.LoadBalancerArn
+  #       ListenerArn: !GetAtt LoadBalancer.Outputs.ListenerArn
+  #       HttpsListenerArn: !GetAtt LoadBalancer.Outputs.HttpsListenerArn
+  #       EnvironmentDNS: !Sub https://${Environment}.velocicast.${HostedZoneName}
+  #       VpcId: !GetAtt VPC.Outputs.VPC
+  #       Environment: !Ref Environment
+  #       SubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
+  #       ServiceName: velocicast
+  #       ClusterType: !Ref ClusterType
+  #       ECSSG: !GetAtt ECSCluster.Outputs.SecurityGroup
+  #       TargetGroupName: !Sub velocicast-${Environment}
+  #       Priority: 30
+  #       HealthCheckPath: /env
+  #       DDApiKey: !Ref DataDogApiKey
+  #       ECR: !Ref ECR
+  #       DockerTag: !Ref DockerTag
+  #       DatadogAPMEnabled: !Ref DatadogAPMEnabled
+  #
+  # ServiceWebsocket:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/infrastructure/service.yml
+  #     TimeoutInMinutes: '60'
+  #     Parameters:
+  #       StickySessions: true
+  #       DesiredCount: 0
+  #       Cluster: !GetAtt ECSCluster.Outputs.EcsCluster
+  #       BucketName: !Ref BucketName
+  #       ContainerPort: 3000
+  #       LoadBalancerArn: !GetAtt LoadBalancer.Outputs.LoadBalancerArn
+  #       ListenerArn: !GetAtt LoadBalancer.Outputs.ListenerArn
+  #       HttpsListenerArn: !GetAtt LoadBalancer.Outputs.HttpsListenerArn
+  #       EnvironmentDNS: !Sub https://${Environment}.velocicast.${HostedZoneName}
+  #       VpcId: !GetAtt VPC.Outputs.VPC
+  #       Environment: !Ref Environment
+  #       SubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
+  #       ServiceName: websocket
+  #       ClusterType: !Ref ClusterType
+  #       ECSSG: !GetAtt ECSCluster.Outputs.SecurityGroup
+  #       TargetGroupName: !Sub websocket-${Environment}
+  #       Path: /socket.io*
+  #       Priority: 20
+  #       HealthCheckPath: /env
+  #       DDApiKey: !Ref DataDogApiKey
+  #       ECR: !Ref ECR
+  #       DockerTag: !Ref DockerTag
+  #       DatadogAPMEnabled: !Ref DatadogAPMEnabled
+  #
+  # ServiceRest:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/infrastructure/service.yml
+  #     TimeoutInMinutes: '60'
+  #     Parameters:
+  #       DesiredCount: 0
+  #       Cluster: !GetAtt ECSCluster.Outputs.EcsCluster
+  #       BucketName: !Ref BucketName
+  #       ContainerPort: 3000
+  #       LoadBalancerArn: !GetAtt LoadBalancer.Outputs.LoadBalancerArn
+  #       ListenerArn: !GetAtt LoadBalancer.Outputs.ListenerArn
+  #       HttpsListenerArn: !GetAtt LoadBalancer.Outputs.HttpsListenerArn
+  #       EnvironmentDNS: !Sub https://${Environment}.velocicast.${HostedZoneName}
+  #       VpcId: !GetAtt VPC.Outputs.VPC
+  #       Environment: !Ref Environment
+  #       SubnetIds: !GetAtt VPC.Outputs.PrivateSubnets
+  #       ServiceName: rest
+  #       ClusterType: !Ref ClusterType
+  #       ECSSG: !GetAtt ECSCluster.Outputs.SecurityGroup
+  #       TargetGroupName: !Sub rest-${Environment}
+  #       Path: /api*
+  #       Priority: 10
+  #       HealthCheckPath: /env
+  #       DDApiKey: !Ref DataDogApiKey
+  #       ECR: !Ref ECR
+  #       DockerTag: !Ref DockerTag
+  #       DatadogAPMEnabled: !Ref DatadogAPMEnabled
+  #
+  # LambdaS3Upload:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/lambda/lambda-S3upload.yml
+  #     TimeoutInMinutes: '15'
+  #     Parameters:
+  #       ClusterName: !Ref Environment
+  #       DatabaseBucketName: !Ref DatabaseBucketName
+  #       DatabaseBucketKey: !Ref DatabaseBucketKey
+  #       Environment: !Ref Environment
+  #       DatabaseBucketRegion: !Ref DatabaseBucketRegion
+  #
+  # LambdaECSFargate:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/lambda/lambdaECS-Fargate.yml
+  #     TimeoutInMinutes: '15'
+  #     Parameters:
+  #       ClusterName: !Ref Environment
+  #       TaskDefinition: !GetAtt ServiceVelocicast.Outputs.TaskDefArn
+  #       Subnet: !GetAtt VPC.Outputs.PrivateSubnet1
+  #       SecurityGroup: !GetAtt ECSCluster.Outputs.SecurityGroup
+  #       Environment: !Ref Environment
+
+  # LambdaDataDogLogs:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/lambda/lambda-dd-log-forwarder.yml
+  #     TimeoutInMinutes: '15'
+  #     Parameters:
+  #       Description: Forward service logs to datadog.
+  #       ShortName: dd-log-forwarder
+  #       Environment: !Ref Environment
+  #       DataDogApiKey: !Ref DataDogApiKey
+  #       BucketName: !Ref BucketName
+  #
+  # LambdaEventsArchive:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/lambda/lambda-api-request-on-schedule.yml
+  #     TimeoutInMinutes: '15'
+  #     Parameters:
+  #       Description: Trigger nightly event archive.
+  #       ShortName: events-archive
+  #       Environment: !Ref Environment
+  #       EnvironmentDNS: !Sub ${Environment}.velocicast.${HostedZoneName}
+  #       EndpointPath: api/events/archive-all
+  #       CWScheduleExpression: cron(0 5,7,9 * * ? *)
+  #
+  # LambdaCustomMetrics:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/lambda/lambda-api-request-on-schedule.yml
+  #     TimeoutInMinutes: '15'
+  #     Parameters:
+  #       Description: Trigger sending custom metrics to datadog every minute.
+  #       ShortName: datadog-metrics
+  #       Environment: !Ref Environment
+  #       EnvironmentDNS: !Sub ${Environment}.velocicast.${HostedZoneName}
+  #       EndpointPath: api/system/run-system-stats
+  #       CWScheduleExpression: rate(1 minute)
+  #
+  # LambdaInventoryRefresh:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub https://s3.amazonaws.com/${BucketName}/lambda/lambda-api-request-on-schedule.yml
+  #     TimeoutInMinutes: '15'
+  #     Parameters:
+  #       Description: Trigger inventory refresh every 20 minutes.
+  #       ShortName: inventory-refresh
+  #       Environment: !Ref Environment
+  #       EnvironmentDNS: !Sub ${Environment}.velocicast.${HostedZoneName}
+  #       EndpointPath: api/events/refresh-lane-inventories
+  #       CWScheduleExpression: rate(20 minutes)
