@@ -6,19 +6,13 @@ Parameters:
     Type: String
   ClusterName:
     Type: String
-  ClusterType:
-    Description: ECS Cluster Type to launch services
-    Type: String
-    AllowedValues:
-      - EC2(OnDemand)
-      - Fargate
   DesiredCapacity:
     Type: String
     Default: 3
   InstanceType:
     Description: Intance type using in the cluster
     Type: String
-    Default: t2.micro
+    Default: t2.medium
   KeyPair:
     Description: Amazon EC2 Key Pair
     Type: AWS::EC2::KeyPair::KeyName
@@ -41,8 +35,6 @@ Parameters:
     Type: CommaDelimitedList
   VpcId:
     Type: String
-  # DataDogApiKey:
-  #   Type: String
 
 Mappings:
   AWSRegionToAMI:
@@ -56,9 +48,6 @@ Mappings:
     us-west-1:
       AMI: ami-0d438d09af26c9583
 
-Conditions:
-  IsEC2: !Equals [ !Ref ClusterType, EC2(OnDemand) ]
-
 Resources:
   EcsCluster:
     Type: AWS::ECS::Cluster
@@ -67,7 +56,6 @@ Resources:
 
   EcsAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-    Condition: IsEC2
     CreationPolicy:
       ResourceSignal:
         Timeout: PT5M
@@ -95,7 +83,6 @@ Resources:
 
   EcsInstanceProfile:
     Type: AWS::IAM::InstanceProfile
-    Condition: IsEC2
     Properties:
       Path: /
       Roles:
@@ -103,7 +90,6 @@ Resources:
 
   EcsLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
-    Condition: IsEC2
     Properties:
       ImageId: !FindInMap [AWSRegionToAMI, !Ref "AWS::Region", AMI]
       InstanceType: !Ref InstanceType
@@ -129,8 +115,6 @@ Resources:
           pip-2.6 install awscli
           yum install -y aws-cfn-bootstrap
           yum install -y git
-
-          #TODO Add DD and Logz.io configuration here
 
           vgextend docker /dev/xvdcy
           lvextend -L+100G /dev/docker/docker-pool
@@ -171,7 +155,6 @@ Resources:
 
   EcsRole:
     Type: AWS::IAM::Role
-    Condition: IsEC2
     Properties:
       Path: /
       RoleName: !Sub ${ClusterName}-EcsRole-${AWS::Region}
@@ -222,7 +205,6 @@ Resources:
 
   RolePolicies:
     Type: AWS::IAM::Policy
-    Condition: IsEC2
     Properties:
       PolicyName: S3Download
       PolicyDocument:
@@ -254,7 +236,6 @@ Resources:
 
   ScaleDownAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsEC2
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -273,7 +254,6 @@ Resources:
 
   ScaleDownPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
-    Condition: IsEC2
     Properties:
       AdjustmentType: ChangeInCapacity
       AutoScalingGroupName: !Ref EcsAutoScalingGroup
@@ -286,7 +266,6 @@ Resources:
 
   ScaleUpMemoryAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: IsEC2
     Properties:
       ActionsEnabled: true
       AlarmActions:
@@ -305,7 +284,6 @@ Resources:
 
   ScaleUpPolicyOnDemand:
     Type: AWS::AutoScaling::ScalingPolicy
-    Condition: IsEC2
     Properties:
       AdjustmentType: ChangeInCapacity
       AutoScalingGroupName: !Ref EcsAutoScalingGroup

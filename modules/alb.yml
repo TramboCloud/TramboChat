@@ -57,32 +57,32 @@ Resources:
   #     ListenerArn: !Ref ELBDefaultListener
   #     Priority: 1
 
-  # ELBHttpsListener:
-  #   Type: AWS::ElasticLoadBalancingV2::Listener
-  #   Properties:
-  #     LoadBalancerArn: !Ref LoadBalancer
-  #     Port: 443
-  #     Protocol: HTTPS
-  #     Certificates:
-  #       - CertificateArn: !Ref Certificate
-  #     DefaultActions:
-  #       - Type: forward
-  #         TargetGroupArn: !Ref HttpsTargetGroup
+  ELBHttpsListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Ref Certificate
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref HttpsTargetGroup
 
-  # HttpsTargetGroup:
-  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
-  #   Properties:
-  #     VpcId: !Ref VpcId
-  #     Port: 443
-  #     Protocol: HTTPS
-  #     Matcher:
-  #       HttpCode: 200-399
-  #     HealthCheckPath: "/"
-  #     HealthCheckProtocol: HTTP
-  #     HealthCheckIntervalSeconds: 20
-  #     HealthCheckTimeoutSeconds: 10
-  #     HealthyThresholdCount: 10
-  #     UnhealthyThresholdCount: 10
+  HttpsTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref VpcId
+      Port: 443
+      Protocol: HTTPS
+      Matcher:
+        HttpCode: 200-399
+      HealthCheckPath: "/"
+      HealthCheckProtocol: HTTP
+      HealthCheckIntervalSeconds: 20
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 10
+      UnhealthyThresholdCount: 10
 
   DefaultTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -124,8 +124,8 @@ Outputs:
     Value: !Ref LoadBalancer
   ListenerArn:
     Value: !Ref ELBDefaultListener
-  # HttpsListenerArn:
-  #   Value: !Ref ELBHttpsListener
+  HttpsListenerArn:
+    Value: !Ref ELBHttpsListener
   LoadBalancerZone:
     Value: !GetAtt LoadBalancer.CanonicalHostedZoneID
   LoadBalancerUrl:
