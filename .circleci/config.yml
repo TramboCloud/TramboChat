@@ -18,8 +18,8 @@ jobs:
           command: |
             sha=$CIRCLE_SHA1
             TAG=latest
-            docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/bam-chat:latest .
-            docker push $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/bam-chat:$TAG
+            docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/chat-demo:latest .
+            docker push $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/chat-demo:$TAG
   deployecs:
     machine: true
     steps:
@@ -36,8 +36,8 @@ jobs:
           command: |
             sha=$CIRCLE_SHA1
             TAG=latest
-            echo "ecs-deploy --region $REGION --cluster $CLUSTER --service-name $SERVICE --image $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/bam-chat:$TAG --timeout 1800"
-            ecs-deploy --region $REGION --cluster $CLUSTER --service-name $SERVICE --image $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/bam-chat:$TAG --timeout 1800
+            echo "ecs-deploy --region $REGION --cluster $CLUSTER --service-name $SERVICE --image $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/chat-demo:$TAG --timeout 1800"
+            ecs-deploy --region $REGION --cluster $CLUSTER --service-name $SERVICE --image $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/chat-demo:$TAG --timeout 1800
 
 workflows:
   version: 2
