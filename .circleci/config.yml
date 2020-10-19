@@ -1,4 +1,4 @@
-version: 2
+us-east-1version: 2
 jobs:
   dockerbuild:
     machine: true
@@ -12,14 +12,14 @@ jobs:
             sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
       - run:
           name: "Log in to AWS ECR"
-          command: eval $(aws ecr get-login --region $REGION --no-include-email)
+          command: eval $(aws ecr get-login --region us-east-1 --no-include-email)
       - run:
           name: Build and push Docker image
           command: |
             sha=$CIRCLE_SHA1
             TAG=latest
-            docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/chat-demo:latest .
-            docker push $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/chat-demo:$TAG
+            docker build -t 492266378106.dkr.ecr.us-east-1.amazonaws.com/chat-demo:latest .
+            docker push 492266378106.dkr.ecr.us-east-1.amazonaws.com/chat-demo:$TAG
   deployecs:
     machine: true
     steps:
@@ -36,8 +36,8 @@ jobs:
           command: |
             sha=$CIRCLE_SHA1
             TAG=latest
-            echo "ecs-deploy --region $REGION --cluster $CLUSTER --service-name $SERVICE --image $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/chat-demo:$TAG --timeout 1800"
-            ecs-deploy --region $REGION --cluster $CLUSTER --service-name $SERVICE --image $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/chat-demo:$TAG --timeout 1800
+            echo "ecs-deploy --region us-east-1 --cluster trambo --service-name trambo-TramboService-1OUCQ9V1XX8V2-Service-SULao5Ei8fYd --image 492266378106.dkr.ecr.us-east-1.amazonaws.com/chat-demo:latest --timeout 1800"
+            ecs-deploy --region us-east-1 --cluster trambo --service-name trambo-TramboService-1OUCQ9V1XX8V2-Service-SULao5Ei8fYd --image 492266378106.dkr.ecr.us-east-1.amazonaws.com/chat-demo:latest --timeout 1800
 
 workflows:
   version: 2
