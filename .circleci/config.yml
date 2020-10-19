@@ -18,8 +18,8 @@ jobs:
           command: |
             sha=$CIRCLE_SHA1
             TAG=latest
-            docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/chat-demo:latest .
-            docker push $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/chat-demo:$TAG
+            docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/trambochat:latest .
+            docker push $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/trambochat:$TAG
   deployecs:
     machine: true
     steps:
