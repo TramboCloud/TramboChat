@@ -8,6 +8,7 @@ var settings = {
 
 server.connection(settings);
 
+
 server.register([require('inert'), require('hapi-error')], function() {
   server.route([
     { method: 'GET', path: '/', handler: { file: 'index.html' } },
