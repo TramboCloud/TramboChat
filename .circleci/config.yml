@@ -5,11 +5,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Switch to Python v3.7"
-          command: |
-            pyenv versions
-            pyenv global 3.7.0
-      - run:
           name: install aws
           command: |
             curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
