@@ -26,7 +26,7 @@ jobs:
       - run:
           name: install aws & ecs-deploy
           command: |
-            curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+            curl "https://s3.amazonaws.com/aws-cli/awscli-bundle-1.16.312.zip" -o "awscli-bundle.zip"
             unzip awscli-bundle.zip
             sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
             sudo wget "https://raw.githubusercontent.com/silinternational/ecs-deploy/develop/ecs-deploy" -O /usr/local/bin/ecs-deploy
