@@ -1,15 +1,14 @@
 version: 2
 jobs:
   dockerbuild:
-    machine: true
+    machine: circleci/classic:201808-01
     steps:
       - checkout
       - run:
-          name: install python 3.7
+          name: "Switch to Python v3.7"
           command: |
+            pyenv versions
             pyenv global 3.7.0
-            sudo python -m pip install --upgrade pip setuptools wheel
-            sudo python -m pip install pipenv
       - run:
           name: install aws
           command: |
