@@ -1,7 +1,7 @@
 version: 2
 jobs:
   dockerbuild:
-    machine: circleci/classic:201808-01
+    machine: true
     steps:
       - checkout
       - run:
